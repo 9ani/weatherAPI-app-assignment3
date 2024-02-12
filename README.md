@@ -63,8 +63,8 @@ Welcome to the WeatherAPI App! This application allows users to check weather in
 ### Admin
 
 The default username and password for admin access are:
-Username: gani
-Password: gani
+- Username: gani
+- Password: gani
 
 ### API Usage
 - OpenWeatherMap API: Provides weather information.
