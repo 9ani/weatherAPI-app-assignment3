@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Page</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"></head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-body">
+            <h1 class="card-title text-center">Admin Page</h1>
+
+            <h2>User List</h2>
+            <ul class="list-group">
+              <% users.forEach(currentUser => { %>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <%= currentUser.username %> (<%= currentUser.isAdmin ? 'Admin' : 'User' %>)
+                  <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-primary" onclick="editUser('<%= currentUser._id %>', '<%= currentUser.username %>', '<%= currentUser.isAdmin %>')">Edit</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteUser('<%= currentUser._id %>')">Delete</button>
+                  </div>
+                </li>
+              <% }); %>
+            </ul>
+
+            <h2 class="mt-4">Add User</h2>
+            <form id="addForm">
+              <div class="form-group">
+                <label for="addUsername">Username:</label>
+                <input type="text" class="form-control" id="addUsername" name="username" required>
+              </div>
+              <div class="form-group">
+                <label for="addPassword">Password:</label>
+                <input type="password" class="form-control" id="addPassword" name="password" required>
+              </div>
+              <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="isAdmin" name="isAdmin">
+                <label class="form-check-label" for="isAdmin">Admin</label>
+              </div>
+              <button type="button" class="btn btn-success" onclick="addUser()">Add User</button>
+            </form>
+            
+            <h2 class="mt-4">Edit User</h2>
+            <form id="editForm">
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  <script>async function addUser() {
+    const username = document.getElementById('addUsername').value;
+    const password = document.getElementById('addPassword').value;
+    const isAdmin = document.getElementById('isAdmin').checked;
+  
+    try {
+      const response = await fetch('/admin/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&isAdmin=${isAdmin}`,
+      });
+  
+      if (response.ok) {
+        location.reload();
+      } else {
+        console.error('Failed to add user');
+      }
+    } catch (error) {
+      console.error('Error adding user:', error);
+    }
+  }
+  
+  async function editUser(userId, username, isAdmin) {
+      document.getElementById("editForm").innerHTML = "";
+  
+      // Create and append form elements
+      const label = document.createElement("label");
+      label.setAttribute("for", `editUsername_${userId}`);
+      label.textContent = "Username:";
+  
+      const input = document.createElement("input");
+      input.setAttribute("type", "text");
+      input.setAttribute("id", `editUsername_${userId}`);
+      input.setAttribute("name", "username");
+      input.setAttribute("required", "true");
+      input.value = username;
+  
+
+      const labelIsAdmin = document.createElement("label");
+      labelIsAdmin.setAttribute("for", `editIsAdmin_${userId}`);
+      labelIsAdmin.textContent = "Is Admin?";
+
+      const isAdminCheckbox = document.createElement("input");
+      isAdminCheckbox.setAttribute("type", "checkbox");
+      isAdminCheckbox.setAttribute("id", `editIsAdmin_${userId}`);
+      isAdminCheckbox.setAttribute("name", "isAdmin");
+      isAdminCheckbox.checked = isAdmin;
+  
+      const submitButton = document.createElement("button");
+      submitButton.setAttribute("type", "button");
+      submitButton.textContent = "Edit User";
+      submitButton.addEventListener("click", () => submitEditUser(userId));
+  
+            document.getElementById("editForm").appendChild(label);
+      document.getElementById("editForm").appendChild(input);
+      document.getElementById("editForm").appendChild(labelIsAdmin); 
+      document.getElementById("editForm").appendChild(isAdminCheckbox);
+      document.getElementById("editForm").appendChild(submitButton);
+          }
+  
+    async function submitEditUser(userId) {
+      const username = document.getElementById(`editUsername_${userId}`).value;
+      const isAdmin = document.getElementById(`editIsAdmin_${userId}`).checked;
+  
+      try {
+        const response = await fetch(`/admin/edit/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `username=${encodeURIComponent(username)}&isAdmin=${isAdmin}`,
+        });
+  
+        if (response.ok) {
+          location.reload();
+        } else {
+          console.error('Failed to edit user');
+        }
+      } catch (error) {
+        console.error('Error editing user:', error);
+      }
+    }
+  
+  
+      async function deleteUser(userId) {
+        if (confirm('Are you sure you want to delete this user?')) {
+          try {
+            const response = await fetch(`/admin/delete/${userId}`, {
+              method: 'POST',
+            });
+  
+            if (response.ok) {
+              location.reload();
+            } else {
+              console.error('Failed to delete user');
+            }
+          } catch (error) {
+            console.error('Error deleting user:', error);
+          }
+        }
+      }</script>
+
+</body>
+</html>
+
+
+
+
+  
